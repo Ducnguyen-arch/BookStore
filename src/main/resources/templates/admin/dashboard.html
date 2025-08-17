@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        .stats-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(45deg, #28a745, #1e7e34);
+        }
+
+        .bg-gradient-info {
+            background: linear-gradient(45deg, #17a2b8, #117a8b);
+        }
+
+        .bg-gradient-warning {
+            background: linear-gradient(45deg, #ffc107, #d39e00);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .activity-item {
+            border-left: 3px solid #007bff;
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+
+        .activity-time {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #007bff, #6f42c1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+        .badge-role {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-tachometer-alt text-primary me-2"></i>Dashboard
+            </h1>
+            <p class="text-muted mb-0">Welcome back, <span class="fw-bold" sec:authentication="name"></span>!</p>
+        </div>
+        <div class="text-muted">
+            <i class="fas fa-calendar-alt me-1"></i>
+            <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Users -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card border-0 shadow h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Users
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalUsers}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stats-icon bg-gradient-primary">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Books -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card border-0 shadow h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Books
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalBooks}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stats-icon bg-gradient-success">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!--        &lt;!&ndash; Active Users &ndash;&gt;-->
+<!--        <div class="col-xl-3 col-md-6 mb-4">-->
+<!--            <div class="card stats-card border-0 shadow h-100">-->
+<!--                <div class="card-body">-->
+<!--                    <div class="row no-gutters align-items-center">-->
+<!--                        <div class="col mr-2">-->
+<!--                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">-->
+<!--                                Active Users-->
+<!--                            </div>-->
+<!--                            <div class="h5 mb-0 font-weight-bold text-gray-800">-->
+<!--&lt;!&ndash;                                <span th:text="${#lists.size(#lists.select(users, user?.enabled))}">0</span>&ndash;&gt;-->
+<!--                                &lt;!&ndash; First filter out nulls, then count enabled &ndash;&gt;-->
+<!--                                <span th:text="${#lists.size(#lists.select(#lists.select(users, '!= null'), 'enabled'))}">0</span>-->
+<!--                            </span>-->
+<!--                        </div>-->
+<!--                        <div class="col-auto">-->
+<!--                            <div class="stats-icon bg-gradient-info">-->
+<!--                                <i class="fas fa-user-check"></i>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <!-- Categories -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card border-0 shadow h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Categories
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <span th:text="${T(com.duc.bookstore.entity.Book.Category).values().length}">0</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stats-icon bg-gradient-warning">
+                                <i class="fas fa-tags"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Recent Users -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-users me-2"></i>Recent Users
+                    </h6>
+                    <a class="btn btn-primary btn-sm" th:href="@{/admin/users}">
+                        <i class="fas fa-eye me-1"></i>View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user, iterStat : ${users}" th:if="${iterStat.index < 5}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3">
+                                            <span th:text="${#strings.substring(user.username,0,1).toUpperCase()}">U</span>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold" th:text="${user.username}">Username</div>
+                                            <div class="text-muted small" th:text="${user.fullName}">Full Name</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${user.email}">email@example.com</td>
+                                <td>
+<!--                                                                            <span th:each="role : ${user.roles}"-->
+<!--                                                                                  th:class="'badge me-1 badge-role ' +-->
+<!--                                                                                           (${role.name() == 'ADMIN'} ? 'bg-danger' :-->
+<!--                                                                                            ${role.name() == 'OPERATOR'} ? 'bg-warning' : 'bg-secondary')"-->
+<!--                                                                                  th:text="${role.name()}">ROLE</span>-->
+
+
+                                    <span th:each="role : ${user.roles}"
+                                          th:class="'badge me-1 badge-role ' +
+               ${#strings.equals(role.name(), 'ADMIN') ? 'bg-danger' :
+                (#strings.equals(role.name(), 'OPERATOR') ? 'bg-warning' : 'bg-secondary')}"
+                                          th:text="${role.name()}">ROLE</span>
+
+<!--                                    <span th:class="'badge me-1 badge-role ' +-->
+<!--                                        ${#strings.equals(role.name(), 'ADMIN') ? 'bg-danger' :-->
+<!--                                        (#strings.equals(role.name(), 'MODERATOR') ? 'bg-warning' : 'bg-secondary')}">-->
+                                </td>
+                                <td>
+                                        <span th:class="'badge ' + (${user.enabled} ? 'bg-success' : 'bg-danger')"
+                                              th:text="${user.enabled} ? 'Active' : 'Inactive'">Status</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a class="btn btn-outline-info"
+                                           th:href="@{/admin/users/{id}(id=${user.id})}" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <form class="d-inline"
+                                              method="post" th:action="@{/admin/users/{id}/toggle(id=${user.id})}">
+                                            <button onclick="return confirm('Are you sure?')"
+                                                    th:class="'btn btn-outline-' + (${user.enabled} ? 'warning' : 'success')"
+                                                    th:title="${user.enabled} ? 'Disable User' : 'Enable User'"
+                                                    type="submit">
+                                                <i th:class="'fas ' + (${user.enabled} ? 'fa-user-slash' : 'fa-user-check')"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & System Info -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-success" th:href="@{/books/add}">
+                            <i class="fas fa-plus me-2"></i>Add New Book
+                        </a>
+                        <a class="btn btn-primary" th:href="@{/admin/users}">
+                            <i class="fas fa-users-cog me-2"></i>Manage Users
+                        </a>
+                        <a class="btn btn-info" th:href="@{/books}">
+                            <i class="fas fa-list me-2"></i>View All Books
+                        </a>
+                        <button class="btn btn-warning" onclick="generateReport()">
+                            <i class="fas fa-chart-bar me-2"></i>Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle me-2"></i>System Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <div class="h5 mb-1 text-primary" th:text="${totalUsers}">0</div>
+                            <div class="small text-muted">Total Users</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h5 mb-1 text-success" th:text="${totalBooks}">0</div>
+                            <div class="small text-muted">Total Books</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="small text-muted">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Server Time:</span>
+                            <span th:text="${#dates.format(#dates.createNow(), 'HH:mm:ss')}">--:--:--</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Database:</span>
+                            <span class="badge bg-success">MySQL</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Version:</span>
+                            <span>1.0.0</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Status:</span>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity (Optional) -->
+    <div class="row mt-4" th:if="${false}"> <!-- Tạm thời ẩn, có thể implement sau -->
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history me-2"></i>Recent Activity
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="activity-item">
+                        <div class="fw-bold">New book added: "Clean Code"</div>
+                        <div class="activity-time">2 hours ago</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="fw-bold">User "john_doe" registered</div>
+                        <div class="activity-time">5 hours ago</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="fw-bold">Book "The Great Gatsby" updated</div>
+                        <div class="activity-time">1 day ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom JavaScript -->
+<script>
+    // Auto-refresh time every second
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('vi-VN');
+        const timeElements = document.querySelectorAll('[data-time]');
+        timeElements.forEach(el => el.textContent = timeString);
+    }
+
+    // Update time every second
+    setInterval(updateTime, 1000);
+
+    // Generate Report Function
+    function generateReport() {
+        // Implement report generation logic
+        alert('Report generation feature will be implemented soon!');
+    }
+
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function () {
+        // Animate statistics cards on load
+        const cards = document.querySelectorAll('.stats-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease-in-out';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Add click effect to quick action buttons
+        const quickActions = document.querySelectorAll('.card-body .btn');
+        quickActions.forEach(btn => {
+            btn.addEventListener('click', function () {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+    });
+</script>
+</body>
+</html>

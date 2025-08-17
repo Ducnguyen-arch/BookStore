@@ -1,0 +1,144 @@
+<!-- books/list.html -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Books List</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-book"></i> Books</h2>
+        <a th:href="@{/books/add}" class="btn btn-primary"
+           sec:authorize="hasRole('ADMIN') or hasRole('OPERATOR')">
+            <i class="fas fa-plus"></i> Add Book
+        </a>
+    </div>
+
+    <!-- Search Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/templates/books}" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="title" class="form-label">Title</label>
+                    <!--/*@thymesVar id="title" type=""*/-->
+                    <input type="text" class="form-control" id="title" name="title" th:value="${title}">
+                </div>
+                <div class="col-md-4">
+                    <label for="author" class="form-label">Author</label>
+                    <!--/*@thymesVar id="author" type=""*/-->
+                    <input type="text" class="form-control" id="author" name="author" th:value="${author}">
+                </div>
+                <div class="col-md-4">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat}"
+                                th:text="${cat}"
+                                th:selected="${cat == category}"></option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <a th:href="@{/templates/books}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Books Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>
+                            <a th:href="@{/templates/books(sortBy='title', sortDir=${sortDir == 'asc' ? 'desc' : 'asc'})}"
+                               class="text-white text-decoration-none">
+                                Title <i class="fas fa-sort"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a th:href="@{/templates/books(sortBy='author', sortDir=${sortDir == 'asc' ? 'desc' : 'asc'})}"
+                               class="text-white text-decoration-none">
+                                Author <i class="fas fa-sort"></i>
+                            </a>
+                        </th>
+                        <th>Category</th>
+                        <th>
+                            <a th:href="@{/templates/books(sortBy='price', sortDir=${sortDir == 'asc' ? 'desc' : 'asc'})}"
+                               class="text-white text-decoration-none">
+                                Price <i class="fas fa-sort"></i>
+                            </a>
+                        </th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="book : ${books}">
+                        <td>
+                            <a th:href="@{/books/{id}(id=${book.id})}"
+                               class="text-decoration-none fw-bold" th:text="${book.title}"></a>
+                        </td>
+                        <td th:text="${book.author}"></td>
+                        <td>
+                            <span class="badge bg-secondary" th:text="${book.category}"></span>
+                        </td>
+                        <td th:text="${book.price} + ' VND'"></td>
+                        <td>
+                                <span th:class="${book.stockQuantity > 0 ? 'badge bg-success' : 'badge bg-danger'}"
+                                      th:text="${book.stockQuantity}"></span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a th:href="@{/books/{id}(id=${book.id})}"
+                                   class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a th:href="@{/books/edit/{id}(id=${book.id})}"
+                                   class="btn btn-outline-warning btn-sm"
+                                   sec:authorize="hasRole('ADMIN') or hasRole('OPERATOR')">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form th:action="@{/books/delete/{id}(id=${book.id})}"
+                                      method="post" class="d-inline"
+                                      sec:authorize="hasRole('ADMIN')"
+                                      onsubmit="return confirm('Are you sure?')">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${books.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li th:class="${books.first} ? 'page-item disabled' : 'page-item'">
+                        <a class="page-link" th:href="@{/books(page=${books.number - 1})}">Previous</a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, books.totalPages - 1)}"
+                        th:class="${i == books.number} ? 'page-item active' : 'page-item'">
+                        <a class="page-link" th:href="@{/books(page=${i})}" th:text="${i + 1}"></a>
+                    </li>
+                    <li th:class="${books.last} ? 'page-item disabled' : 'page-item'">
+                        <a class="page-link" th:href="@{/books(page=${books.number + 1})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+</body>
+</html>

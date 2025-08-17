@@ -1,0 +1,23 @@
+<form th:action="@{/books/add}" th:object="${book}" method="post">
+    <!-- Title field with validation -->
+    <div class="mb-3">
+        <label for="title" class="form-label">Title *</label>
+        <input type="text" class="form-control" th:field="*{title}"
+               th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''">
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}"
+             th:errors="*{title}"></div>
+    </div>
+
+    <!-- Category dropdown -->
+    <div class="mb-3">
+        <label for="category" class="form-label">Category</label>
+        <select class="form-select" th:field="*{category}">
+            <option th:each="cat : ${categories}"
+                    th:value="${cat}"
+                    th:text="${cat}"></option>
+        </select>
+    </div>
+
+    <!-- Submit button -->
+    <button type="submit" class="btn btn-primary">Add Book</button>
+</form>
